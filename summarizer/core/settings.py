@@ -26,7 +26,7 @@ SECRET_KEY = config('DJANGO_SECRET_KEY')
 DEBUG = config('DEBUG', default = False, cast = bool)
 
 
-ALLOWED_HOSTS = [ '127.0.0.1','localhost']
+ALLOWED_HOSTS = [ '127.0.0.1','http://localhost:5173']
 
 
 # Application definition
