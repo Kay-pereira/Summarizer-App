@@ -26,7 +26,7 @@ SECRET_KEY = config('DJANGO_SECRET_KEY')
 DEBUG = config('DEBUG', default = False, cast = bool)
 
 
-ALLOWED_HOSTS = [ '127.0.0.1', ]
+ALLOWED_HOSTS = [ '127.0.0.1','localhost']
 
 
 # Application definition
@@ -140,9 +140,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = False # For development only! ⚠️
 # Optional safer version:
-CORS_ALLOWED_ORIGINS = [
-     config('CORS_ALLOWED_ORIGINS'),
-]
+CORS_ALLOWED_ORIGINS = [ "https://summarizer-app-sepia.vercel.app/" ]
 
 REST_FRAMEWORK = {
      'DEFAULT_AUTHENTICATION_CLASSES': (
