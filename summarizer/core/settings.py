@@ -26,7 +26,7 @@ SECRET_KEY = config('DJANGO_SECRET_KEY')
 DEBUG = config('DEBUG', default = False, cast = bool)
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [config('ALLOWED_HOSTS'),]
 
 
 # Application definition
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware', 
     'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -75,11 +76,14 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'backend.summarizer.core.wsgi.application'
+WSGI_APPLICATION = 'summarizer.core.wsgi.application'
+
 
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+
+import dj_database_url
 
 DATABASES = {
     'default': {
@@ -87,6 +91,10 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+DATABASE_URL = config('DATABASE_URL', default=None)
+if DATABASE_URL:
+    DATABASES['default'] = dj_database_url.parse(DATABASE_URL, conn_max_age=600, ssl_require=True)
 
 
 # Password validation
@@ -133,7 +141,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = False # For development only! ⚠️
 # Optional safer version:
 CORS_ALLOWED_ORIGINS = [
-     "https://summarizer-app-phi.vercel.app/",
+     config('CORS_ALLOWED_ORIGINS'),
 ]
 
 REST_FRAMEWORK = {
