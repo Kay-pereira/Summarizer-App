@@ -140,7 +140,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = False # For development only! ⚠️
 # Optional safer version:
-CORS_ALLOWED_ORIGINS = [ "https://summarizer-app-sepia.vercel.app/" ]
+CORS_ALLOWED_ORIGINS = [ "https://summarizer-app-sepia.vercel.app" ]
 
 REST_FRAMEWORK = {
      'DEFAULT_AUTHENTICATION_CLASSES': (
