@@ -1,2 +1,2 @@
 
-web: gunicorn summariser.core.wsgi
+web: gunicorn summarizer.core.wsgi
