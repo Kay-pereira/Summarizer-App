@@ -7,7 +7,7 @@ body {
   color: #e2e8f0;
   overflow-x: hidden;
 
-  /* ChatGPT-ish dark gradients */
+  /*dark gradients */
   background:
     radial-gradient(1200px 800px at 15% -10%, rgba(56,189,248,0.15), transparent 40%),
     radial-gradient(900px 600px at 110% 0%, rgba(129,140,248,0.15), transparent 35%),

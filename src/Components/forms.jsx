@@ -23,7 +23,7 @@ function UploadForm() {
     formData.append('file', file);
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/summarize/`, {
+      const response = await fetch(`${process.env.BACKEND_API_URL}/api/summarize/`, {
         method: 'POST',
         body: formData,
       });
@@ -53,7 +53,7 @@ function UploadForm() {
   return (
     <div className="upload-wrapper">
       <div className="upload-card">
-        <h2 className="title">📄 File Summarizer</h2>
+        <h2 className="title">📄 Ai File Summarizer</h2>
 
         <form onSubmit={handleUpload} className="upload-form">
           {/* Stylish upload button */}
@@ -63,7 +63,7 @@ function UploadForm() {
           </label>
 
           <button type="submit" disabled={loading} className="btn gradient">
-            {loading ? 'Processing...' : '✨ Upload & Summarize'}
+            {loading ? 'Reading And Thinking...' : '✨ Upload & Summarize'}
           </button>
         </form>
 
@@ -81,7 +81,7 @@ function UploadForm() {
             </h3>
             <pre className="summary-text">{summary}</pre>
             <button onClick={downloadSummary} className="btn secondary">
-              ⬇️ Download Summary
+              ⬇️ Download Your Summary
             </button>
           </div>
         )}
