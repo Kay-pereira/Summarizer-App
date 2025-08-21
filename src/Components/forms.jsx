@@ -23,7 +23,7 @@ function UploadForm() {
     formData.append('file', file);
 
     try {
-      const response = await fetch(`${process.env.BACKEND_API_URL}/api/summarize/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/summarize/`, {
         method: 'POST',
         body: formData,
       });
