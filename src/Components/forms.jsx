@@ -22,12 +22,13 @@ function UploadForm() {
     const formData = new FormData();
     formData.append('file', file);
 
-    try {
-      const response = await fetch(`${process.env.VITE_BACKEND_API_URL}/api/summarize/`, {
+    console.log("Backend URL:", import.meta.env.VITE_BACKEND_API_URL); // debug log
+
+     try {
+       const response = await fetch(`${import.meta.env.VITE_BACKEND_API_URL}/api/summarize/`, {
         method: 'POST',
         body: formData,
       });
-      console.log("Backend URL:", process.env.VITE_BACKEND_API_URL);
 
 
       const result = await response.json();
