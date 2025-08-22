@@ -78,9 +78,10 @@ function UploadForm() {
   return (
     <div className="upload-wrapper">
       <div className="upload-card">
-        <h2 className="title">📄 Ai File Summarizer</h2>
+        <h2 className="title">Ai File Summarizer</h2>
 
         <form onSubmit={handleUpload} className="upload-form">
+
           {/* Drop area */}
           <div
             className={`drop-zone ${dragOver ? 'drag-over' : ''}`}
@@ -89,7 +90,7 @@ function UploadForm() {
             onDragLeave={handleDragLeave}
           >
             {file ? (
-              <p>✅ {file.name} selected</p>
+              <p> {file.name} selected</p>
             ) : (
               <p>Drag & Drop your file here, or choose below</p>
             )}
@@ -103,7 +104,7 @@ function UploadForm() {
               hidden
               onChange={(e) => handleFileSelect(e.target.files[0])}
             />
-            <span>📂 Choose File</span>
+            <span>Choose File</span>
           </label>
 
           <button type="submit" disabled={loading} className="btn gradient">
@@ -125,7 +126,7 @@ function UploadForm() {
             </h3>
             <pre className="summary-text">{summary}</pre>
             <button onClick={downloadSummary} className="btn secondary">
-              ⬇️ Download Your Summary
+              Download Your Summary
             </button>
           </div>
         )}
