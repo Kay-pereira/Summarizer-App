@@ -23,10 +23,12 @@ function UploadForm() {
     formData.append('file', file);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/summarize/`, {
+      const response = await fetch(`${process.env.VITE_BACKEND_API_URL}/api/summarize/`, {
         method: 'POST',
         body: formData,
       });
+      console.log("Backend URL:", process.env.VITE_BACKEND_API_URL);
+
 
       const result = await response.json();
       if (response.ok) {
