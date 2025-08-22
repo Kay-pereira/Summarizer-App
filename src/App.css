@@ -198,3 +198,27 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
+.drop-zone {
+  border: 2px dashed #999;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  color: #555;
+  margin-bottom: 12px;
+  transition: background 0.2s, border-color 0.2s;
+  word-wrap: break-word;      /* allows long words to break */
+  overflow-wrap: break-word;  /* modern support */
+  white-space: normal;        /* ensures text wraps */
+  max-width: 100%;            /* keeps inside parent */
+}
+
+.drop-zone p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.drop-zone.drag-over {
+  background: #4b86d3;
+  border-color: #007bff;
+}

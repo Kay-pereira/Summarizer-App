@@ -5,31 +5,53 @@ function UploadForm() {
   const [summary, setSummary] = useState('');
   const [fileName, setFileName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [file, setFile] = useState(null);
+  const [dragOver, setDragOver] = useState(false);
+
+  const handleFileSelect = (file) => {
+    if (!file) return;
+    setFile(file);
+    setFileName(file.name);
+    setSummary('');
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const droppedFile = e.dataTransfer.files[0];
+    handleFileSelect(droppedFile);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = () => {
+    setDragOver(false);
+  };
 
   const handleUpload = async (e) => {
     e.preventDefault();
-    const file = e.target.file.files[0];
 
     if (!file) {
       alert("Please select a file.");
       return;
     }
 
-    setFileName(file.name);
     setLoading(true);
     setSummary('');
 
     const formData = new FormData();
     formData.append('file', file);
 
-    console.log("Backend URL:", import.meta.env.VITE_BACKEND_API_URL); // debug log
+    console.log("Backend URL:", import.meta.env.VITE_BACKEND_API_URL);
 
-     try {
-       const response = await fetch(`${import.meta.env.VITE_BACKEND_API_URL}/api/summarize/`, {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_API_URL}/api/summarize/`, {
         method: 'POST',
         body: formData,
       });
-
 
       const result = await response.json();
       if (response.ok) {
@@ -46,8 +68,8 @@ function UploadForm() {
 
   const downloadSummary = () => {
     const element = document.createElement("a");
-    const file = new Blob([summary], { type: 'text/plain' });
-    element.href = URL.createObjectURL(file);
+    const fileBlob = new Blob([summary], { type: 'text/plain' });
+    element.href = URL.createObjectURL(fileBlob);
     element.download = `${fileName.replace(/\.[^/.]+$/, "")}_summary.txt`;
     document.body.appendChild(element);
     element.click();
@@ -59,9 +81,28 @@ function UploadForm() {
         <h2 className="title">📄 Ai File Summarizer</h2>
 
         <form onSubmit={handleUpload} className="upload-form">
+          {/* Drop area */}
+          <div
+            className={`drop-zone ${dragOver ? 'drag-over' : ''}`}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+          >
+            {file ? (
+              <p>✅ {file.name} selected</p>
+            ) : (
+              <p>Drag & Drop your file here, or choose below</p>
+            )}
+          </div>
+
           {/* Stylish upload button */}
           <label className="upload-btn">
-            <input type="file" name="file" hidden />
+            <input
+              type="file"
+              name="file"
+              hidden
+              onChange={(e) => handleFileSelect(e.target.files[0])}
+            />
             <span>📂 Choose File</span>
           </label>
 
@@ -89,8 +130,6 @@ function UploadForm() {
           </div>
         )}
       </div>
-
-      
     </div>
   );
 }
