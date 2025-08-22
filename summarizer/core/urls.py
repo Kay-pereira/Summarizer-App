@@ -16,10 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from summarizer.views import SummarizeView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('summarizer.urls')),
+    path('api/summarize/', SummarizeView.as_view(), name='summarize'),
 ]
 
 from rest_framework_simplejwt.views import (

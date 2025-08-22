@@ -1,7 +1,9 @@
 
-from django.urls import path
+from django.urls import path, include
 from summarizer.views import SummarizeView
+from core.urls import 
+
 
 urlpatterns = [
-    path('api/summarize/', SummarizeView.as_view(), name='summarize'),
+    path('api/', include('core.urls')),
 ]
