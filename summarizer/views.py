@@ -49,28 +49,46 @@ class SummarizeView(APIView):
             return Response(summary, status=200)
 
         except Exception as e:
+            error_trace = traceback.format_exc()
             print("❌ Exception occurred:", str(e))
-            return Response({'error': str(e)}, status=500)
-
+            print(error_trace)
+            return Response(
+                {'error': str(e), 'trace': error_trace},
+                status=500
+            )
     def extract_pdf(self, file):
-        doc = fitz.open(stream=file.read(), filetype="pdf")
-        text = ""
-        for page in doc:
-            text += page.get_text()
-        return text
+        try:
+            data = file.read()
+            print("📦 PDF file size:", len(data))
+            doc = fitz.open(stream=data, filetype="pdf")
+            text = ""
+            for page in doc:
+                text += page.get_text()
+            return text
+        except Exception as e:
+            print("❌ PDF extraction failed:", e)
+            raise
 
     def extract_docx(self, file):
-        doc = docx.Document(file)
-        return "\n".join([para.text for para in doc.paragraphs])
+        try:
+            doc = docx.Document(file)
+            return "\n".join([para.text for para in doc.paragraphs])
+        except Exception as e:
+            print("❌ DOCX extraction failed:", e)
+            raise
 
     def extract_pptx(self, file):
-        prs = Presentation(file)
-        text = ""
-        for slide in prs.slides:
-            for shape in slide.shapes:
-                if hasattr(shape, "text"):
-                    text += shape.text + "\n"
-        return text
+        try:
+            prs = Presentation(file)
+            text = ""
+            for slide in prs.slides:
+                for shape in slide.shapes:
+                    if hasattr(shape, "text"):
+                        text += shape.text + "\n"
+            return text
+        except Exception as e:
+            print("❌ PPTX extraction failed:", e)
+            raise
 
     def get_summary(self, text):
         prompt = f"Please provide an overview and a detailed summary of the following lesson content:\n\n{text}"
