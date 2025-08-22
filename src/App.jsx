@@ -2,7 +2,7 @@
 import './App.css'
 import UploadForm from "./Components/forms";
 import Footer from './Components/Footer';
-
+import { Analytics } from "@vercel/analytics/react"
 
 function App() {
   
@@ -12,6 +12,7 @@ function App() {
        <div className="App">
         <UploadForm />
         <Footer />
+        <Analytics />
       </div>
     </>
   )
