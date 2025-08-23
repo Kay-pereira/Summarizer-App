@@ -56,7 +56,7 @@ class SummarizeView(APIView):
             summarydb.objects.create(
                 file_name=file.name,
                 original_text=text [:4000],
-                summery_text=summary["summery"]
+                summary_text=summary["summary"]
             )
 
             print("Summary received.")
