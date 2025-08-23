@@ -1,6 +1,6 @@
 
 from django.urls import path, include
-from summarizer.views import SummarizeView
+from summarizer.views import SummarizeView, SummaryListView
 
 
 

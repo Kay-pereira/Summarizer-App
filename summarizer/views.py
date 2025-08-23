@@ -9,15 +9,21 @@ from rest_framework import status
 import fitz  # PyMuPDF
 import docx
 from pptx import Presentation
-import  openai 
+import openai
 from decouple import config
+import traceback
+from .models import summarydb
+
 
 openai.api_key = config("OPEN_AI_API_KEY")
 
+
 class SummarizeView(APIView):
+
     parser_classes = [MultiPartParser]
 
     def post(self, request, format=None):
+
         try:
             file = request.FILES.get('file')
             print("📁 File received:", file)
@@ -45,7 +51,15 @@ class SummarizeView(APIView):
 
             # Summarize (limit to 4000 chars to avoid OpenAI overload)
             summary = self.get_summary(text[:4000])
-            print("✅ Summary received.")
+
+            # Saving to DB
+            summarydb.objects.create(
+                file_name=file.name,
+                original_text=text [:4000],
+                summery_text=summary["summery"]
+            )
+
+            print("Summary received.")
             return Response(summary, status=200)
 
         except Exception as e:
@@ -56,6 +70,7 @@ class SummarizeView(APIView):
                 {'error': str(e), 'trace': error_trace},
                 status=500
             )
+
     def extract_pdf(self, file):
         try:
             data = file.read()
@@ -111,3 +126,9 @@ class SummarizeView(APIView):
             raise
 
 
+class SummaryListView(APIView):
+    def get(self, request):
+        summaries = summarydb.objects.order_by('-created_at').values(
+            "file_name", "summary_text", "created_at"
+        )
+        return Response(list(summaries), status=200)
