@@ -58,22 +58,28 @@ export default function Summaries() {
 
       {/* Summaries List */}
       {filteredSummaries.length === 0 ? (
-        <p className="empty">No summaries found.</p>
-      ) : (
-        <ul className="summary-list">
-          {filteredSummaries.map((s, index) => (
-            <li key={index} className="summary-card">
-              <div className="summary-header">
-                <p className="file-name">{s.file_name}</p>
-                <p className="timestamp">
-                  {new Date(s.created_at).toLocaleString()}
-                </p>
-              </div>
-              <p className="summary-text">{s.summary_text}</p>
-            </li>
-          ))}
-        </ul>
-      )}
+  <p className="empty">No summaries found.</p>
+) : (
+  <ul className="summary-list">
+    {filteredSummaries.map((s, index) => (
+      <li key={index} className="summary-card">
+        <div className="summary-header">
+          <p className="file-name">{s.file_name}</p>
+          <p className="timestamp">
+            {new Date(s.created_at).toLocaleString()}
+          </p>
+        </div>
+        {/* Show only first 150 characters */}
+        <p className="summary-text">
+          {s.summary_text.length > 150
+            ? s.summary_text.slice(0, 150) + "..."
+            : s.summary_text}
+        </p>
+      </li>
+    ))}
+  </ul>
+)}
+
     </div>
   );
 }
