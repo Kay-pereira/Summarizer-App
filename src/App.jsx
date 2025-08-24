@@ -14,7 +14,7 @@ function App() {
         <UploadForm />
         <Footer />
         <Analytics />
-        <Summaries />
+
       </div>
     </>
   )

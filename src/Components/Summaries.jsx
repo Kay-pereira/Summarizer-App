@@ -1,17 +1,24 @@
+import { useState, useEffect } from "react";
 
 async function fetchSummaries() {
-    const responce = await fetch('https://summarizer-app-production.up.railway.app/api/summaries/')
+  const token = localStorage.getItem("access"); // 👈 grab JWT from localStorage
 
-    if (!responce.ok){
-        throw new Error("Failed to fetch Your Info")
-        
+  const response = await fetch(
+    "https://summarizer-app-production.up.railway.app/api/summaries/",
+    {
+      headers: {
+        Authorization: `Bearer ${token}`, // 👈 attach token
+        "Content-Type": "application/json",
+      },
     }
+  );
 
-    return responce.json()
+  if (!response.ok) {
+    throw new Error("Failed to fetch Your Info");
+  }
+
+  return response.json();
 }
-
-
-import { useState,useEffect } from "react"
 
 export default function Summaries() {
   const [summaries, setSummaries] = useState([]);
@@ -33,9 +40,10 @@ export default function Summaries() {
     load();
   }, []);
 
-  const filteredSummaries = summaries.filter((s) =>
-    s.file_name.toLowerCase().includes(query.toLowerCase()) ||
-    s.summary_text.toLowerCase().includes(query.toLowerCase())
+  const filteredSummaries = summaries.filter(
+    (s) =>
+      s.file_name.toLowerCase().includes(query.toLowerCase()) ||
+      s.summary_text.toLowerCase().includes(query.toLowerCase())
   );
 
   if (loading) return <p className="loading">Loading summaries...</p>;
@@ -58,29 +66,27 @@ export default function Summaries() {
 
       {/* Summaries List */}
       {filteredSummaries.length === 0 ? (
-  <p className="empty">No summaries found.</p>
-) : (
-  <ul className="summary-list">
-    {filteredSummaries.map((s, index) => (
-      <li key={index} className="summary-card">
-        <div className="summary-header">
-          <p className="file-name">{s.file_name}</p>
-          <p className="timestamp">
-            {new Date(s.created_at).toLocaleString()}
-          </p>
-        </div>
-        {/* Show only first 150 characters */}
-        <p className="summary-text">
-          {s.summary_text.length > 150
-            ? s.summary_text.slice(0, 150) + "..."
-            : s.summary_text}
-        </p>
-      </li>
-    ))}
-  </ul>
-)}
-
+        <p className="empty">No summaries found.</p>
+      ) : (
+        <ul className="summary-list">
+          {filteredSummaries.map((s, index) => (
+            <li key={index} className="summary-card">
+              <div className="summary-header">
+                <p className="file-name">{s.file_name}</p>
+                <p className="timestamp">
+                  {new Date(s.created_at).toLocaleString()}
+                </p>
+              </div>
+              {/* Show only first 150 characters */}
+              <p className="summary-text">
+                {s.summary_text.length > 150
+                  ? s.summary_text.slice(0, 150) + "..."
+                  : s.summary_text}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
-
