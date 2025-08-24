@@ -180,8 +180,8 @@ function AuthModal({ onAuthSuccess }) {
   const handleAuth = async (e) => {
     e.preventDefault();
     const url = isLogin
-      ? `${import.meta.env.VITE_BACKEND_API_URL}/auth/token/`
-      : `${import.meta.env.VITE_BACKEND_API_URL}/auth/register/`;
+      ? `${import.meta.env.VITE_BACKEND_API_URL}/api/auth/token/`
+      : `${import.meta.env.VITE_BACKEND_API_URL}/api/auth/register/`;
 
     const payload = isLogin
       ? { username, password }
