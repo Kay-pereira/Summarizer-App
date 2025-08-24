@@ -1,134 +1,144 @@
-from django.shortcuts import render
-
-# Create your views here.
-
+import traceback
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.models import User
+
 import fitz  # PyMuPDF
 import docx
 from pptx import Presentation
 import openai
 from decouple import config
-import traceback
-from .models import summarydb
+
+from .models import Summary
+from .serializers import RegisterSerializer, SummarySerializer
+
+openai.api_key = config("OPEN_AI_API_KEY", default=None)
 
 
-openai.api_key = config("OPEN_AI_API_KEY")
+class RegisterView(APIView):
+    authentication_classes = []  # allow unauthenticated
+    permission_classes = []      # allow unauthenticated
+
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response(
+                {"message": "Account created", "username": user.username},
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SummarizeView(APIView):
-
+    permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser]
 
     def post(self, request, format=None):
-
         try:
-            file = request.FILES.get('file')
-            print("📁 File received:", file)
+            # Ensure OpenAI key present
+            if not openai.api_key:
+                return Response({"error": "OpenAI API key not configured."}, status=500)
 
+            file = request.FILES.get("file")
             if not file:
-                print("🚫 No file uploaded.")
-                return Response({'error': 'No file uploaded'}, status=400)
+                return Response({"error": "No file uploaded"}, status=400)
 
             ext = file.name.lower()
-            print("📄 File extension:", ext)
-
-            if ext.endswith('.pdf'):
+            if ext.endswith(".pdf"):
                 text = self.extract_pdf(file)
-            elif ext.endswith('.docx'):
+            elif ext.endswith(".docx"):
                 text = self.extract_docx(file)
-            elif ext.endswith('.pptx'):
+            elif ext.endswith(".pptx"):
                 text = self.extract_pptx(file)
             else:
-                print("❌ Unsupported file type.")
-                return Response({'error': 'Unsupported file type'}, status=400)
+                return Response({"error": "Unsupported file type"}, status=400)
 
-            print("📝 Extracted text length:", len(text))
             if len(text.strip()) == 0:
-                return Response({'error': 'File has no readable text.'}, status=400)
+                return Response({"error": "File has no readable text."}, status=400)
 
-            # Summarize (limit to 4000 chars to avoid OpenAI overload)
-            summary = self.get_summary(text[:4000])
+            # Limit text length to avoid hitting token limits
+            truncated = text[:4000]
+            summary = self.get_summary(truncated)
 
-            # Saving to DB
-            summarydb.objects.create(
+            # Save to DB tied to user
+            record = Summary.objects.create(
+                user=request.user,
                 file_name=file.name,
-                original_text=text [:4000],
-                summary_text=summary["summary"]
+                original_text=truncated,
+                summary_text=summary.get("summary", summary if isinstance(summary, str) else "")
             )
 
-            print("Summary received.")
-            return Response(summary, status=200)
+            output = {
+                "overview": summary.get("overview") if isinstance(summary, dict) else "",
+                "summary": summary.get("summary") if isinstance(summary, dict) else (summary if isinstance(summary, str) else ""),
+                "id": record.id,
+            }
 
+            return Response(output, status=200)
+
+        except ValueError as ve:
+            return Response({"error": str(ve)}, status=400)
         except Exception as e:
-            error_trace = traceback.format_exc()
-            print("❌ Exception occurred:", str(e))
-            print(error_trace)
-            return Response(
-                {'error': str(e), 'trace': error_trace},
-                status=500
-            )
+            trace = traceback.format_exc()
+            print("❌ SummarizeView Exception:", str(e))
+            print(trace)
+            return Response({"error": "Internal server error", "trace": str(e)}, status=500)
 
     def extract_pdf(self, file):
         try:
             data = file.read()
-            print("📦 PDF file size:", len(data))
             doc = fitz.open(stream=data, filetype="pdf")
-            text = ""
+            text_parts = []
             for page in doc:
-                text += page.get_text()
-            return text
+                text_parts.append(page.get_text())
+            return "\n".join(text_parts)
         except Exception as e:
-            print("❌ PDF extraction failed:", e)
-            raise
+            raise ValueError(f"Invalid or corrupted PDF file: {e}")
 
     def extract_docx(self, file):
         try:
             doc = docx.Document(file)
-            return "\n".join([para.text for para in doc.paragraphs])
+            return "\n".join([p.text for p in doc.paragraphs if p.text])
         except Exception as e:
-            print("❌ DOCX extraction failed:", e)
-            raise
+            raise ValueError(f"Invalid or corrupted DOCX file: {e}")
 
     def extract_pptx(self, file):
         try:
             prs = Presentation(file)
-            text = ""
+            text = []
             for slide in prs.slides:
                 for shape in slide.shapes:
-                    if hasattr(shape, "text"):
-                        text += shape.text + "\n"
-            return text
+                    if hasattr(shape, "text") and shape.text:
+                        text.append(shape.text)
+            return "\n".join(text)
         except Exception as e:
-            print("❌ PPTX extraction failed:", e)
-            raise
+            raise ValueError(f"Invalid or corrupted PPTX file: {e}")
 
     def get_summary(self, text):
-        prompt = f"Please provide an overview and a detailed summary of the following lesson content:\n\n{text}"
-
+        # Use ChatCompletion (older style) — keep same as in your code; if you use new OpenAI SDK, adapt here.
         try:
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are a helpful teaching assistant."},
-                    {"role": "user", "content": prompt}
+                    {"role": "user", "content": f"Please provide an overview and a detailed summary of the following lesson content:\n\n{text}"}
                 ]
             )
             result = response.choices[0].message.content
-            return {
-                "overview": result.split("\n")[0],
-                "summary": result
-            }
+            return {"overview": result.split("\n")[0] if result else "", "summary": result}
         except Exception as e:
-            print("❌ OpenAI API error:", str(e))
-            raise
+            # bubble up as an error to be returned as 500
+            raise Exception(f"OpenAI API error: {e}")
 
 
 class SummaryListView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
-        summaries = summarydb.objects.order_by('-created_at').values(
-            "file_name", "summary_text", "created_at"
-        )
-        return Response(list(summaries), status=200)
+        qs = Summary.objects.filter(user=request.user).order_by("-created_at")
+        serializer = SummarySerializer(qs, many=True)
+        return Response(serializer.data, status=200)

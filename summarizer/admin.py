@@ -1,8 +1,7 @@
 from django.contrib import admin
-from .models import summarydb
+from .models import Summary
 
-# Register your models here.
-
-@admin.register(summarydb)
+@admin.register(Summary)
 class SummaryAdmin(admin.ModelAdmin):
-    list_display = ("file_name", "created_at")
+    list_display = ("file_name", "user", "created_at")
+    search_fields = ("file_name", "user__username")
