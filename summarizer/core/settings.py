@@ -58,7 +58,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'summarizer.core.urls'
+ROOT_URLCONF = 'summarizer.urls'
 
 
 TEMPLATES = [
