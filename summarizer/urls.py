@@ -5,5 +5,5 @@ from summarizer.views import SummarizeView, SummaryListView
 
 
 urlpatterns = [
-    path('api/', include('core.urls')),
+    path('api/', include('summarizer.core.urls')),
 ]
