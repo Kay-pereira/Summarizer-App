@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; 
+import React, { useState, useEffect } from 'react';
 import '../App.css';
 
 function UploadForm() {
@@ -8,13 +8,13 @@ function UploadForm() {
   const [file, setFile] = useState(null);
   const [dragOver, setDragOver] = useState(false);
 
-  //  Auth states
+  // Auth states
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showAuth, setShowAuth] = useState(true);
 
   // check if already logged in
   useEffect(() => {
-    const token = localStorage.getItem("access");
+    const token = localStorage.getItem("access_token");
     if (token) {
       setIsAuthenticated(true);
       setShowAuth(false);
@@ -60,7 +60,7 @@ function UploadForm() {
     const formData = new FormData();
     formData.append('file', file);
 
-    const token = localStorage.getItem("access");
+    const token = localStorage.getItem("access_token");
 
     try {
       const response = await fetch(
@@ -185,7 +185,7 @@ function AuthModal({ onAuthSuccess }) {
 
     const payload = isLogin
       ? { username, password }
-      : { username, email, password }; // include email only on signup
+      : { username, email, password1: password, password2: password };
 
     try {
       const res = await fetch(url, {
@@ -195,20 +195,25 @@ function AuthModal({ onAuthSuccess }) {
       });
 
       const data = await res.json();
+
       if (!res.ok) {
-        alert("Auth error: " + (data.detail || JSON.stringify(data)));
-        return;
+        throw new Error(data.detail || "Authentication failed");
       }
 
-      // Save tokens if login
       if (isLogin) {
-        localStorage.setItem("access", data.access);
-        localStorage.setItem("refresh", data.refresh);
+        localStorage.setItem("access_token", data.access);
+        localStorage.setItem("refresh_token", data.refresh);
+      } else {
+        if (data.access) {
+          localStorage.setItem("access_token", data.access);
+          localStorage.setItem("refresh_token", data.refresh);
+        }
       }
 
       onAuthSuccess();
-    } catch (error) {
-      console.error("Network error:", error);
+    } catch (err) {
+      console.error("Auth error:", err.message);
+      alert(err.message);
     }
   };
 
